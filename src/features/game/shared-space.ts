@@ -64,16 +64,22 @@ async function openSharedSpace(code: string): Promise<SharedSpace> {
   }
 }
 
-/** How often a phone asks for the latest game again, in case a change slipped past it. */
-const CATCH_UP_EVERY_MS = 10_000
+/** How often a phone swaps the latest game with the others again, in case a change slipped past. */
+const CATCH_UP_EVERY_MS = 5_000
 
 /**
- * Asks the others for the latest content every few seconds and whenever the page comes back into view. TinyBase
- * fetches a change from the phone that made it with a 1-second timeout, so a change from a phone that was locked right
- * after its move can otherwise sit unseen until the next one.
+ * Pulls the others' latest content and pushes this phone's own, every few seconds and whenever the page comes back
+ * into view. TinyBase fetches each change from the phone that made it with a 1-second timeout, so when that phone is
+ * locked or throttled right after its move the change goes nowhere: not to the others, and not to the server either.
  */
-function catchUpNowAndThen(syncing: Promise<{ load: () => Promise<unknown> }>): () => void {
-  const catchUp = () => void syncing.then((synchronizer) => synchronizer.load()).catch(() => {})
+function catchUpNowAndThen(syncing: Promise<{ load: () => Promise<unknown>; save: () => Promise<unknown> }>): () => void {
+  const catchUp = () =>
+    void syncing
+      .then(async (synchronizer) => {
+        await synchronizer.load()
+        await synchronizer.save()
+      })
+      .catch(() => {})
   const catchUpWhenVisible = () => document.visibilityState === 'visible' && catchUp()
   const timer = setInterval(catchUp, CATCH_UP_EVERY_MS)
   document.addEventListener('visibilitychange', catchUpWhenVisible)
