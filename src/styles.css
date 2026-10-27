@@ -1,0 +1,932 @@
+/* The quilt world: indigo backing cloth, brass pins, cotton prints, woven labels, thread in each player's colour. */
+:root {
+  --backing: #1d2a4d;
+  --backing-deep: #141e3a;
+  --backing-weave: rgb(255 255 255 / 0.035);
+  --backing-weave-strong: rgb(255 255 255 / 0.05);
+  --binding-plain: rgb(241 230 210 / 0.35);
+
+  --label-cloth: #f1e6d2;
+  --label-rib: rgb(29 42 77 / 0.12);
+  --label-rib-strong: rgb(29 42 77 / 0.1);
+  --label-ink: #1d2a4d;
+  --label-bright: #fffaf0;
+  --label-ink-soft: #4a5577;
+
+  --ink: #f4ecdd;
+  --ink-soft: #c3c9de;
+  --basting: rgb(244 236 221 / 0.22);
+  --basting-hover: rgb(244 236 221 / 0.6);
+
+  --pin: #c99d3e;
+  --pin-shine: #f6dc93;
+  --pin-shadow: rgb(8 12 28 / 0.55);
+
+  --fabric-0: #cf3f34;
+  --fabric-1: #e0a22a;
+  --fabric-2: #23928a;
+  --fabric-3: #de6a9b;
+  --print-light-0: rgb(255 244 236 / 0.42);
+  --print-light-1: #fff3d1;
+  --print-light-2: #dcf3ee;
+  --print-light-3: #ffeaf3;
+
+  --thread-0: #ff7c6b;
+  --thread-1: #ffcb4f;
+  --thread-2: #58d6c8;
+  --thread-3: #ff9fc8;
+
+  --problem: #ffb4a6;
+
+  --font-display: 'Bricolage Grotesque Variable', 'Atkinson Hyperlegible', sans-serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.25rem;
+  --space-7: 3.5rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --page-width: 30rem;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  background-color: var(--backing);
+  /* A fine plain weave, so the ground reads as cloth rather than a flat colour. */
+  background-image:
+    repeating-linear-gradient(0deg, var(--backing-weave) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, var(--backing-weave) 0 1px, transparent 1px 3px);
+}
+
+::selection {
+  background: var(--thread-1);
+  color: var(--label-ink);
+}
+
+:focus-visible {
+  outline: 2px dashed var(--thread-1);
+  outline-offset: 3px;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+#root {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-7);
+}
+
+.fabric-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Prints */
+.print-ground-0 { fill: var(--fabric-0); }
+.print-ground-1 { fill: var(--fabric-1); }
+.print-ground-2 { fill: var(--fabric-2); }
+.print-ground-3 { fill: var(--fabric-3); }
+.print-wash { fill: var(--print-light-0); }
+.print-motif-1 { fill: var(--print-light-1); }
+.print-motif-2 { fill: var(--print-light-2); }
+.print-motif-3 { fill: var(--print-light-3); }
+
+/* The board */
+.quilt {
+  margin: 0;
+}
+
+.quilt-board {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: manipulation;
+}
+
+.backing-ground { fill: var(--backing); }
+.backing-thread { fill: var(--backing-weave-strong); }
+
+/* The binding round the quilt's edge, in the thread of whoever leads: the player whose turn it is, or the winner. */
+.quilt-binding {
+  fill: none;
+  stroke: var(--binding-plain);
+  stroke-width: 8;
+  transition: stroke 300ms var(--ease-out);
+}
+
+.binding-0 { stroke: var(--thread-0); }
+.binding-1 { stroke: var(--thread-1); }
+.binding-2 { stroke: var(--thread-2); }
+.binding-3 { stroke: var(--thread-3); }
+
+.quilt-binding.is-sewn-on {
+  stroke-width: 12;
+  stroke-dasharray: 100;
+  animation: sew-binding 1600ms var(--ease-out) both;
+}
+
+@keyframes sew-binding {
+  from { stroke-dashoffset: 100; }
+}
+
+.pin-shadow { fill: var(--pin-shadow); }
+.pin-head { fill: var(--pin); }
+.pin-shine { fill: var(--pin-shine); }
+
+.basting {
+  stroke: var(--basting);
+  stroke-width: 2;
+  stroke-dasharray: 3 9;
+  stroke-linecap: round;
+}
+
+.seam-button {
+  cursor: pointer;
+  outline: none;
+}
+
+.seam-target {
+  stroke: transparent;
+  stroke-width: 34;
+}
+
+.seam-preview {
+  stroke: var(--basting-hover);
+  stroke-width: 5;
+  stroke-dasharray: 10 7;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.seam-button:hover .seam-preview,
+.seam-button:focus-visible .seam-preview {
+  opacity: 1;
+}
+
+.seam-button:focus-visible .seam-target {
+  stroke: rgb(255 203 79 / 0.16);
+}
+
+.stitch {
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* The mask a stitch is drawn through: it grows from one pin to the other, pulling the thread along. */
+.stitch-pull {
+  stroke: #ffffff;
+  stroke-width: 16;
+  stroke-dasharray: 100;
+  animation: pull-thread 420ms var(--ease-out) both;
+}
+
+@keyframes pull-thread {
+  from { stroke-dashoffset: 100; }
+}
+
+.last-tag {
+  animation: pop-tag 360ms 300ms var(--ease-out) both;
+  transform-box: fill-box;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.last-tag-ring {
+  fill: var(--label-cloth);
+  filter: drop-shadow(0 2px 2px rgb(8 12 28 / 0.5));
+}
+
+@keyframes pop-tag {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+/* Each seat sews its own stitch, so seams tell players apart without colour too. */
+.thread-0 { stroke: var(--thread-0); stroke-dasharray: 9 5; }
+.thread-1 { stroke: var(--thread-1); stroke-dasharray: 3 4; }
+.thread-2 { stroke: var(--thread-2); stroke-dasharray: 14 4 3 4; }
+.thread-3 { stroke: var(--thread-3); stroke-dasharray: 6 3 1 3; }
+
+.patch {
+  animation: lay-patch 520ms var(--ease-out) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.patch[role='button'] {
+  cursor: pointer;
+  outline: none;
+}
+
+.patch[role='button']:focus-visible .patch-hem {
+  stroke: var(--label-ink);
+  stroke-width: 3;
+}
+
+.patch-cloth {
+  filter: drop-shadow(1px 3px 2px rgb(8 12 28 / 0.45));
+}
+
+.patch-hem {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.75);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+  /* Hemmed once the patch has landed. */
+  animation: hem 480ms 380ms var(--ease-out) both;
+}
+
+@keyframes hem {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0); }
+}
+
+@keyframes lay-patch {
+  from {
+    opacity: 0;
+    transform: scale(0.82) rotate(-4deg);
+  }
+}
+
+.quilt-caption {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+/* Woven labels */
+.name-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  background-color: var(--label-cloth);
+  background-image: repeating-linear-gradient(90deg, var(--label-rib-strong) 0 1px, transparent 1px 3px);
+  color: var(--label-ink);
+  font-weight: 700;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgb(8 12 28 / 0.35);
+}
+
+/* Folded ends, like a label sewn into a seam. */
+.name-label::before,
+.name-label::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  background: var(--label-rib);
+}
+
+.name-label::before { left: 0; }
+.name-label::after { right: 0; }
+
+.name-label.is-current {
+  outline: 2px dashed var(--label-cloth);
+  outline-offset: 3px;
+}
+
+.swatch {
+  width: 1.375rem;
+  height: 1.375rem;
+  flex: none;
+  border-radius: 2px;
+}
+
+.swatch-stitch {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.8);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.score {
+  margin-left: var(--space-1);
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem;
+}
+
+/* Buttons and fields */
+.button-tag,
+.button-quiet,
+.button-small {
+  cursor: pointer;
+  border: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out),
+    opacity 160ms;
+}
+
+.button-tag {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--label-ink);
+  background-color: var(--label-cloth);
+  background-image: repeating-linear-gradient(90deg, var(--label-rib-strong) 0 1px, transparent 1px 3px);
+  border-radius: 3px;
+  outline: 2px dashed rgb(29 42 77 / 0.35);
+  outline-offset: -7px;
+  box-shadow: 0 3px 8px rgb(8 12 28 / 0.4);
+}
+
+.button-tag:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgb(8 12 28 / 0.45);
+}
+
+.button-tag:focus-visible {
+  outline: 2px dashed var(--label-ink);
+}
+
+.button-quiet {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: 1.125rem;
+  color: var(--ink);
+  background: transparent;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px var(--basting-hover);
+}
+
+.button-quiet:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.button-small {
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.9375rem;
+  color: var(--ink);
+  background: transparent;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px var(--basting-hover);
+}
+
+:is(.button-tag, .button-quiet):disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.field-label {
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.field-input {
+  width: 100%;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: 3px;
+  color: var(--label-ink);
+  background: var(--label-cloth);
+  font-size: 1.125rem;
+}
+
+.field-input::placeholder {
+  color: var(--label-ink-soft);
+}
+
+.field-input:focus-visible {
+  outline: 2px dashed var(--thread-1);
+  outline-offset: 3px;
+}
+
+.field-input-words {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.problem {
+  margin: 0;
+  padding: var(--space-3);
+  color: var(--problem);
+  font-weight: 700;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgb(255 180 166 / 0.5);
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+.panel-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* Home */
+.home {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.home-hero {
+  position: relative;
+  margin: 0 calc(var(--space-2) * -1);
+}
+
+.sewn-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  transform: translate(-50%, -50%) rotate(-3deg);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 10vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--label-ink);
+  background-color: var(--label-cloth);
+  background-image: repeating-linear-gradient(90deg, var(--label-rib-strong) 0 1px, transparent 1px 3px);
+  border-radius: 3px;
+  outline: 2px dashed rgb(29 42 77 / 0.4);
+  outline-offset: -8px;
+  box-shadow: 0 8px 18px rgb(8 12 28 / 0.5);
+}
+
+.home-pitch {
+  margin: 0;
+  font-size: 1.125rem;
+  text-wrap: pretty;
+}
+
+.home-pitch-short {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Arriving from a scanned code: a smaller quilt, and the name and Join both within the first screen. */
+.home.is-joining {
+  gap: var(--space-4);
+}
+
+.home.is-joining .home-hero {
+  width: 62%;
+  margin: 0 auto;
+}
+
+.home.is-joining .sewn-title {
+  font-size: 1.5rem;
+}
+
+.home.is-joining .home-pitch {
+  order: 1;
+}
+
+.home-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 2px dashed var(--basting);
+}
+
+.size-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.size-picker legend {
+  margin-bottom: var(--space-2);
+}
+
+.size-option {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
+.size-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.size-option-face {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: var(--space-2);
+  border-radius: 3px;
+  background: var(--backing-deep);
+  box-shadow: inset 0 0 0 2px var(--basting);
+  transition: box-shadow 160ms var(--ease-out);
+}
+
+/* A miniature grid of pins per size. */
+.size-option-grid {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle, var(--pin) 0 2.5px, transparent 3px);
+}
+
+.size-option-grid[data-size='3'] { background-size: 33.333% 33.333%; }
+.size-option-grid[data-size='4'] { background-size: 25% 25%; }
+.size-option-grid[data-size='5'] { background-size: 20% 20%; }
+
+.size-option-text {
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.size-option input:checked + .size-option-face {
+  box-shadow:
+    inset 0 0 0 2px var(--thread-1),
+    0 0 0 3px var(--backing),
+    0 0 0 5px var(--thread-1);
+}
+
+.size-option input:checked ~ .size-option-text {
+  color: var(--ink);
+}
+
+.size-option input:focus-visible + .size-option-face {
+  outline: 2px dashed var(--thread-1);
+  outline-offset: 6px;
+}
+
+/* Game */
+.game {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.game-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.game-bar-title {
+  margin-right: auto;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.connection {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.connection::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  background: var(--basting-hover);
+}
+
+.connection.is-online::before {
+  background: var(--thread-2);
+}
+
+.game-status {
+  margin: var(--space-6) 0;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.waiting,
+.table {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.seats {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.seat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One woven strip with a tab per player, ruled apart by a stitch. */
+.score-strip {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--label-ink);
+  background-color: var(--label-cloth);
+  background-image: repeating-linear-gradient(90deg, var(--label-rib-strong) 0 1px, transparent 1px 3px);
+  border-radius: 3px;
+  box-shadow: 0 3px 8px rgb(8 12 28 / 0.4);
+}
+
+.score-tab {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font-weight: 700;
+}
+
+.score-tab + .score-tab {
+  border-left: 2px dashed rgb(29 42 77 / 0.3);
+}
+
+.score-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The leading tab gets an edge in the player's print colour (the deeper shade reads on cream), echoing the binding. */
+.score-tab.tab-thread-0 { --tab-thread: var(--fabric-0); }
+.score-tab.tab-thread-1 { --tab-thread: var(--fabric-1); }
+.score-tab.tab-thread-2 { --tab-thread: var(--fabric-2); }
+.score-tab.tab-thread-3 { --tab-thread: var(--fabric-3); }
+
+.score-tab.is-current,
+.score-tab.is-winner {
+  box-shadow: inset 0 -6px 0 var(--tab-thread);
+}
+
+.score-tab.is-winner {
+  background: var(--label-bright);
+  box-shadow:
+    inset 0 -6px 0 var(--tab-thread),
+    inset 0 0 0 3px var(--tab-thread);
+}
+
+.score-tab.is-winner .score {
+  font-size: 1.5rem;
+}
+
+.turn {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 7vw, 2.125rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Inline, so the swatch stays with the first word when the line wraps. */
+.turn .swatch {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.3em;
+  vertical-align: -0.15em;
+}
+
+.is-my-turn .turn {
+  font-size: clamp(2rem, 9vw, 2.75rem);
+}
+
+
+.turn.fabric-0 { color: var(--thread-0); }
+.turn.fabric-1 { color: var(--thread-1); }
+.turn.fabric-2 { color: var(--thread-2); }
+.turn.fabric-3 { color: var(--thread-3); }
+
+.last-stitch {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.invite {
+  padding-top: var(--space-4);
+  border-top: 2px dashed var(--basting);
+}
+
+.invite summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.invite summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A stitched square that turns when the panel opens. */
+.invite summary::before {
+  content: '';
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px dashed var(--thread-1);
+  transition: transform 200ms var(--ease-out);
+}
+
+.invite[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.invite[open] summary {
+  margin-bottom: var(--space-4);
+}
+
+/* The four words, on a big label */
+.code-card {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  color: var(--label-ink);
+  background-color: var(--label-cloth);
+  background-image: repeating-linear-gradient(90deg, var(--label-rib-strong) 0 1px, transparent 1px 3px);
+  border-radius: 4px;
+  outline: 2px dashed rgb(29 42 77 / 0.35);
+  outline-offset: -10px;
+  box-shadow: 0 6px 16px rgb(8 12 28 / 0.45);
+}
+
+.code-instruction {
+  margin: 0;
+  color: var(--label-ink-soft);
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.code-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 9vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.code-qr {
+  width: min(11rem, 60%);
+  height: auto;
+}
+
+/* Printed in label ink on the label: still dark on light, so it scans. */
+.code-qr-paper { fill: var(--label-cloth); }
+.code-qr-ink { fill: var(--label-ink); }
+
+.unsafe-note {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--label-ink-soft);
+  font-size: 0.875rem;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/* Confirm dialog */
+.confirm {
+  max-width: min(26rem, calc(100vw - 2rem));
+  padding: var(--space-5);
+  border: 0;
+  border-radius: 4px;
+  color: var(--label-ink);
+  background-color: var(--label-cloth);
+  box-shadow: 0 16px 40px rgb(8 12 28 / 0.6);
+}
+
+.confirm::backdrop {
+  background: rgb(10 15 32 / 0.7);
+}
+
+.confirm-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.confirm-text p {
+  margin: 0;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.confirm .button-quiet {
+  color: var(--label-ink);
+  box-shadow: inset 0 0 0 2px rgb(29 42 77 / 0.35);
+}
+
+.confirm .button-tag {
+  color: var(--label-cloth);
+  background: var(--label-ink);
+  outline-color: rgb(241 230 210 / 0.4);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-width: 44rem;
+  }
+
+  #root {
+    padding-top: var(--space-5);
+  }
+
+  /* On a laptop the board sizes by height, so the whole quilt fits without scrolling. */
+  .table .quilt-board {
+    max-height: calc(100dvh - 15rem);
+    margin: 0 auto;
+  }
+
+  .home,
+  .waiting {
+    max-width: 34rem;
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
